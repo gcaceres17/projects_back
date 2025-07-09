@@ -9,10 +9,10 @@ from datetime import datetime, date
 
 from app.database import get_db
 from app.auth import get_current_user
-from app.models import Cotizacion, CotizacionItem, Usuario, Cliente, Proyecto
+from app.models import Cotizacion, ItemCotizacion, Usuario, Cliente, Proyecto
 from app.schemas import (
     CotizacionCreate, CotizacionUpdate, CotizacionResponse, 
-    CotizacionItemCreate, PaginatedResponse
+    ItemCotizacionCreate, PaginatedResponse
 )
 from app.services.cotizacion_service import cotizacion_service
 
@@ -43,7 +43,7 @@ def generar_numero_cotizacion(db: Session) -> str:
     return f"COT-{year:04d}{month:02d}-{new_number:04d}"
 
 
-def calcular_totales_cotizacion(items: List[CotizacionItemCreate]) -> dict:
+def calcular_totales_cotizacion(items: List[ItemCotizacionCreate]) -> dict:
     """
     Calcular subtotal, impuestos y total de la cotización.
     """
@@ -153,7 +153,7 @@ async def crear_cotizacion(
         
         # Crear items de la cotizacion
         for idx, item_data in enumerate(cotizacion_data.items):
-            item = CotizacionItem(
+            item = ItemCotizacion(
                 cotizacion_id=cotizacion.id,
                 descripcion=item_data.descripcion,
                 cantidad=item_data.cantidad,
@@ -240,8 +240,8 @@ async def actualizar_cotizacion(
         # Si se proporcionan items, recalcular y actualizar
         if cotizacion_data.items is not None:
             # Eliminar items existentes
-            db.query(CotizacionItem).filter(
-                CotizacionItem.cotizacion_id == cotizacion_id
+            db.query(ItemCotizacion).filter(
+                ItemCotizacion.cotizacion_id == cotizacion_id
             ).delete()
             
             # Calcular nuevos totales
@@ -252,7 +252,7 @@ async def actualizar_cotizacion(
             
             # Crear nuevos items
             for idx, item_data in enumerate(cotizacion_data.items):
-                item = CotizacionItem(
+                item = ItemCotizacion(
                     cotizacion_id=cotizacion.id,
                     descripcion=item_data.descripcion,
                     cantidad=item_data.cantidad,

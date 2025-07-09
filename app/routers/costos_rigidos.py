@@ -115,7 +115,7 @@ async def obtener_costo_rigido(
     Obtener costo rígido por ID.
     """
     try:
-        costo = costo_service.get_by_id(db=db, obj_id=costo_id)
+        costo = costo_rigido_service.get_by_id(db=db, obj_id=costo_id)
         if not costo:
             raise HTTPException(status_code=404, detail="Costo no encontrado")
         
@@ -139,7 +139,7 @@ async def actualizar_costo_rigido(
     """
     try:
         # Verificar que el costo existe
-        costo_existente = costo_service.get_by_id(db=db, obj_id=costo_id)
+        costo_existente = costo_rigido_service.get_by_id(db=db, obj_id=costo_id)
         if not costo_existente:
             raise HTTPException(status_code=404, detail="Costo no encontrado")
         
@@ -161,7 +161,7 @@ async def actualizar_costo_rigido(
             )
         
         # Actualizar costo
-        costo = costo_service.update(
+        costo = costo_rigido_service.update(
             db=db, 
             obj_id=costo_id, 
             obj_data=update_dict
@@ -186,12 +186,12 @@ async def eliminar_costo_rigido(
     """
     try:
         # Verificar que el costo existe
-        costo = costo_service.get_by_id(db=db, obj_id=costo_id)
+        costo = costo_rigido_service.get_by_id(db=db, obj_id=costo_id)
         if not costo:
             raise HTTPException(status_code=404, detail="Costo no encontrado")
         
         # Soft delete
-        costo_service.delete(db=db, obj_id=costo_id)
+        costo_rigido_service.delete(db=db, obj_id=costo_id)
         
         return {"message": "Costo eliminado exitosamente"}
         

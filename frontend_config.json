@@ -1,0 +1,31 @@
+{
+  "api": {
+    "baseUrl": "http://localhost:8000/api/v1",
+    "timeout": 30000,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "auth": {
+    "tokenKey": "auth_token",
+    "refreshTokenKey": "refresh_token",
+    "adminCredentials": {
+      "email": "admin@sistema.com",
+      "password": "admin123"
+    }
+  },
+  "endpoints": {
+    "auth": {
+      "login": "/auth/login",
+      "register": "/auth/register",
+      "refresh": "/auth/refresh"
+    },
+    "colaboradores": "/colaboradores/",
+    "clientes": "/clientes/",
+    "proyectos": "/proyectos/",
+    "cotizaciones": "/cotizaciones/",
+    "costos_rigidos": "/costos-rigidos/",
+    "reportes": "/reportes/",
+    "dashboard": "/reportes/dashboard"
+  }
+}

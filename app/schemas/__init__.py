@@ -31,6 +31,7 @@ from .reporte import (
     ResumenFinanciero, RendimientoProyecto, RendimientoColaborador,
     EstadisticasGenerales, TipoReporte, PeriodoReporte, FormatoReporte
 )
+from .common import PaginatedResponse
 
 __all__ = [
     # Colaborador
@@ -65,4 +66,7 @@ __all__ = [
     "ReporteRequest", "ReporteResponse", "DashboardData", "Alerta",
     "ResumenFinanciero", "RendimientoProyecto", "RendimientoColaborador",
     "EstadisticasGenerales", "TipoReporte", "PeriodoReporte", "FormatoReporte",
+    
+    # Common
+    "PaginatedResponse",
 ]

@@ -99,7 +99,8 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         *,
         skip: int = 0,
         limit: int = 100,
-        filters: Optional[List] = None
+        filters: Optional[List] = None,
+        order_by: Optional[List] = None
     ) -> Dict[str, Any]:
         """
         Obtener datos paginados con metadatos.
@@ -115,6 +116,15 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         # Obtener datos
         items = self.get_multi(db=db, skip=skip, limit=limit, filters=filters)
+        
+        # Aplicar ordenamiento si se especifica
+        if order_by:
+            query = db.query(self.model)
+            if filters:
+                query = query.filter(and_(*filters))
+            for order_field in order_by:
+                query = query.order_by(order_field)
+            items = query.offset(skip).limit(limit).all()
         
         # Contar total
         total = self.get_count(db=db, filters=filters)
