@@ -376,8 +376,6 @@ async def obtener_estadisticas_cotizaciones(
     Obtener estadísticas generales de cotizaciones.
     """
     try:
-        from sqlalchemy import sum as sql_sum
-        
         # Estadísticas generales
         stats = db.query(
             func.count(Cotizacion.id).label("total"),
@@ -385,8 +383,8 @@ async def obtener_estadisticas_cotizaciones(
             func.count().filter(Cotizacion.estado == "enviada").label("enviadas"),
             func.count().filter(Cotizacion.estado == "aprobada").label("aprobadas"),
             func.count().filter(Cotizacion.estado == "rechazada").label("rechazadas"),
-            sql_sum(Cotizacion.total).label("valor_total"),
-            sql_sum(Cotizacion.total).filter(Cotizacion.estado == "aprobada").label("valor_aprobado")
+            func.sum(Cotizacion.total).label("valor_total"),
+            func.sum(Cotizacion.total).filter(Cotizacion.estado == "aprobada").label("valor_aprobado")
         ).filter(Cotizacion.activo == True).first()
         
         # Cotizaciones por mes (últimos 6 meses)
@@ -394,7 +392,7 @@ async def obtener_estadisticas_cotizaciones(
             func.extract('year', Cotizacion.fecha_cotizacion).label('año'),
             func.extract('month', Cotizacion.fecha_cotizacion).label('mes'),
             func.count(Cotizacion.id).label('cantidad'),
-            sql_sum(Cotizacion.total).label('valor')
+            func.sum(Cotizacion.total).label('valor')
         ).filter(
             and_(
                 Cotizacion.activo == True,

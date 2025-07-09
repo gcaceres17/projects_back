@@ -231,15 +231,14 @@ async def obtener_estadisticas_cliente(
             raise HTTPException(status_code=404, detail="Cliente no encontrado")
         
         from app.models import Proyecto, Cotizacion
-        from sqlalchemy import func, sum as sql_sum
         
         # Estadísticas de proyectos
         proyectos_stats = db.query(
             func.count(Proyecto.id).label("total_proyectos"),
             func.count().filter(Proyecto.estado == "completado").label("proyectos_completados"),
             func.count().filter(Proyecto.estado == "en_progreso").label("proyectos_en_progreso"),
-            sql_sum(Proyecto.presupuesto).label("presupuesto_total"),
-            sql_sum(Proyecto.costo_real).label("costo_real_total")
+            func.sum(Proyecto.presupuesto).label("presupuesto_total"),
+            func.sum(Proyecto.costo_real).label("costo_real_total")
         ).filter(
             and_(
                 Proyecto.cliente_id == cliente_id,
@@ -251,7 +250,7 @@ async def obtener_estadisticas_cliente(
         cotizaciones_stats = db.query(
             func.count(Cotizacion.id).label("total_cotizaciones"),
             func.count().filter(Cotizacion.estado == "aprobada").label("cotizaciones_aprobadas"),
-            sql_sum(Cotizacion.total).label("valor_total_cotizaciones")
+            func.sum(Cotizacion.total).label("valor_total_cotizaciones")
         ).filter(
             and_(
                 Cotizacion.cliente_id == cliente_id,

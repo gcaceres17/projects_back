@@ -48,10 +48,21 @@ class Settings(BaseSettings):
     # Email Configuration
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: int = 587
-    SMTP_USER: Optional[str] = None
+    SMTP_USERNAME: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
+    EMAIL_ENABLED: bool = False
     EMAILS_FROM_EMAIL: Optional[str] = None
     EMAILS_FROM_NAME: Optional[str] = None
+    
+    # Redis Configuration (opcional)
+    REDIS_URL: Optional[str] = None
+    
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "json"
+    
+    # Timezone
+    TIMEZONE: str = "America/Bogota"
     
     @validator("DATABASE_URL", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: dict) -> str:
@@ -63,6 +74,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "allow"  # Permitir variables extra del .env
 
 
 # Instancia global de configuración

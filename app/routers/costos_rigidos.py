@@ -4,7 +4,7 @@ Router para gestión de costos rígidos
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, sum as sql_sum, extract
+from sqlalchemy import and_, func, extract
 from datetime import datetime, date
 
 from app.database import get_db
@@ -216,7 +216,7 @@ async def obtener_estadisticas_costos(
             func.count().filter(CostoRigido.tipo == "fijo").label("costos_fijos"),
             func.count().filter(CostoRigido.tipo == "variable").label("costos_variables"),
             func.count().filter(CostoRigido.tipo == "recurrente").label("costos_recurrentes"),
-            sql_sum(CostoRigido.monto).label("monto_total"),
+            func.sum(CostoRigido.monto).label("monto_total"),
             func.avg(CostoRigido.monto).label("monto_promedio")
         ).filter(CostoRigido.activo == True).first()
         
@@ -224,21 +224,21 @@ async def obtener_estadisticas_costos(
         stats_categoria = db.query(
             CostoRigido.categoria,
             func.count(CostoRigido.id).label("cantidad"),
-            sql_sum(CostoRigido.monto).label("monto_total"),
+            func.sum(CostoRigido.monto).label("monto_total"),
             func.avg(CostoRigido.monto).label("monto_promedio")
         ).filter(
             CostoRigido.activo == True
         ).group_by(
             CostoRigido.categoria
         ).order_by(
-            sql_sum(CostoRigido.monto).desc()
+            func.sum(CostoRigido.monto).desc()
         ).all()
         
         # Estadísticas por frecuencia
         stats_frecuencia = db.query(
             CostoRigido.frecuencia,
             func.count(CostoRigido.id).label("cantidad"),
-            sql_sum(CostoRigido.monto).label("monto_total")
+            func.sum(CostoRigido.monto).label("monto_total")
         ).filter(
             CostoRigido.activo == True
         ).group_by(
@@ -249,7 +249,7 @@ async def obtener_estadisticas_costos(
         stats_proyecto = db.query(
             Proyecto.nombre.label("proyecto_nombre"),
             func.count(CostoRigido.id).label("cantidad_costos"),
-            sql_sum(CostoRigido.monto).label("monto_total")
+            func.sum(CostoRigido.monto).label("monto_total")
         ).join(
             Proyecto, CostoRigido.proyecto_id == Proyecto.id, isouter=True
         ).filter(
@@ -257,7 +257,7 @@ async def obtener_estadisticas_costos(
         ).group_by(
             Proyecto.id, Proyecto.nombre
         ).order_by(
-            sql_sum(CostoRigido.monto).desc()
+            func.sum(CostoRigido.monto).desc()
         ).limit(10).all()
         
         # Costos mensuales (últimos 12 meses)
@@ -265,7 +265,7 @@ async def obtener_estadisticas_costos(
             extract('year', CostoRigido.fecha_inicio).label('año'),
             extract('month', CostoRigido.fecha_inicio).label('mes'),
             func.count(CostoRigido.id).label('cantidad'),
-            sql_sum(CostoRigido.monto).label('monto_total')
+            func.sum(CostoRigido.monto).label('monto_total')
         ).filter(
             and_(
                 CostoRigido.activo == True,

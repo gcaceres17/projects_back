@@ -13,12 +13,8 @@ import logging
 
 from app.database import get_db
 from app.auth import get_current_user
-from app.models.usuario import Usuario
-from app.models.proyecto import Proyecto
-from app.models.colaborador import Colaborador
-from app.models.cotizacion import Cotizacion
-from app.models.costo_rigido import CostoRigido
-from app.models.cliente import Cliente
+from app.models import Usuario, Proyecto, Colaborador, Cotizacion, CostoRigido, Cliente
+# from app.services.pdf_service import PDFGenerator  # TODO: Implementar servicio PDF
 
 logger = logging.getLogger(__name__)
 
