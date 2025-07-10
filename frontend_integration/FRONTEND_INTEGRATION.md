@@ -90,7 +90,7 @@ Content-Type: application/json
   "expires_in": 1800,
   "user": {
     "id": 1,
-    "email": "admin@example.com",
+    "email": "admin@sistema.com",
     "nombre": "Admin",
     "is_active": true,
     "is_admin": true

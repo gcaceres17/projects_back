@@ -35,7 +35,7 @@ def test_auth():
         # Intentar login con credenciales por defecto
         login_data = {
             "email": "admin@sistema.com",
-            "password": "admin123"
+            "password": "Admin123!"
         }
         
         response = requests.post(f"{API_URL}/auth/login", json=login_data)

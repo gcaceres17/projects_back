@@ -13,7 +13,7 @@ import logging
 
 from app.database import get_db
 from app.auth import get_current_user
-from app.models import Usuario, Proyecto, Colaborador, Cotizacion, CostoRigido, Cliente
+from app.models import Usuario, Proyecto, Colaborador, Cotizacion, CostoRigido, Cliente, EstadoProyecto, EstadoCotizacion
 # from app.services.pdf_service import PDFGenerator  # TODO: Implementar servicio PDF
 
 logger = logging.getLogger(__name__)
@@ -40,10 +40,10 @@ async def get_dashboard_stats(
         # Estadísticas de proyectos
         total_proyectos = db.query(Proyecto).count()
         proyectos_activos = db.query(Proyecto).filter(
-            Proyecto.estado == "activo"
+            Proyecto.estado == EstadoProyecto.EN_PROGRESO
         ).count()
         proyectos_completados = db.query(Proyecto).filter(
-            Proyecto.estado == "completado"
+            Proyecto.estado == EstadoProyecto.COMPLETADO
         ).count()
         
         # Estadísticas de colaboradores
@@ -55,10 +55,10 @@ async def get_dashboard_stats(
         # Estadísticas de cotizaciones
         total_cotizaciones = db.query(Cotizacion).count()
         cotizaciones_pendientes = db.query(Cotizacion).filter(
-            Cotizacion.estado == "pendiente"
+            Cotizacion.estado == EstadoCotizacion.ENVIADA
         ).count()
         cotizaciones_aprobadas = db.query(Cotizacion).filter(
-            Cotizacion.estado == "aprobada"
+            Cotizacion.estado == EstadoCotizacion.APROBADA
         ).count()
         
         # Estadísticas de clientes
@@ -75,7 +75,7 @@ async def get_dashboard_stats(
         valor_cotizaciones_aprobadas = db.query(
             func.sum(Cotizacion.total)
         ).filter(
-            Cotizacion.estado == "aprobada"
+            Cotizacion.estado == EstadoCotizacion.APROBADA
         ).scalar() or 0
         
         return {
@@ -119,6 +119,39 @@ async def get_dashboard_stats(
             status_code=500,
             detail="Error al obtener estadísticas del dashboard"
         )
+
+
+@router.get("/dashboard-test")
+async def get_dashboard_stats_test():
+    """
+    Endpoint de prueba para dashboard sin autenticación.
+    Devuelve datos de ejemplo para testing.
+    """
+    return {
+        "proyectos": {
+            "total": 5,
+            "activos": 3,
+            "completados": 2,
+            "porcentaje_completados": 40.0
+        },
+        "colaboradores": {
+            "total": 8,
+            "activos": 7,
+            "porcentaje_activos": 87.5
+        },
+        "cotizaciones": {
+            "total": 12,
+            "pendientes": 4,
+            "aprobadas": 6,
+            "valor_total": 25000000.0,
+            "valor_aprobadas": 15000000.0
+        },
+        "clientes": {
+            "total": 10,
+            "activos": 8,
+            "porcentaje_activos": 80.0
+        }
+    }
 
 
 @router.get("/proyectos-por-estado")
@@ -283,7 +316,7 @@ async def get_colaboradores_productividad(
             Colaborador.especialidad,
             func.count(Proyecto.id).label('proyectos_asignados')
         ).outerjoin(
-            Proyecto, Colaborador.id == Proyecto.colaborador_principal_id
+            Proyecto, Colaborador.id == Proyecto.claborador_principal_id
         ).group_by(
             Colaborador.id,
             Colaborador.nombre,
@@ -388,7 +421,7 @@ async def get_resumen_financiero(
         ingresos_cotizaciones = db.query(
             func.sum(Cotizacion.total)
         ).filter(
-            Cotizacion.estado == "aprobada"
+            Cotizacion.estado == EstadoCotizacion.APROBADA
         ).scalar() or 0
         
         # Gastos de costos rígidos
