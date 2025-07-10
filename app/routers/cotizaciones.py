@@ -91,10 +91,10 @@ async def listar_cotizaciones(
             filters.append(Cotizacion.estado == estado)
         
         if fecha_desde:
-            filters.append(Cotizacion.fecha_cotizacion >= fecha_desde)
+            filters.append(Cotizacion.fecha_creacion >= fecha_desde)
         
         if fecha_hasta:
-            filters.append(Cotizacion.fecha_cotizacion <= fecha_hasta)
+            filters.append(Cotizacion.fecha_creacion <= fecha_hasta)
         
         # Obtener datos paginados
         result = cotizacion_service.get_paginated(
@@ -102,7 +102,7 @@ async def listar_cotizaciones(
             skip=skip,
             limit=limit,
             filters=filters,
-            order_by=[Cotizacion.fecha_cotizacion.desc()]
+            order_by=[Cotizacion.fecha_creacion.desc()]
         )
         
         return result
@@ -389,21 +389,21 @@ async def obtener_estadisticas_cotizaciones(
         
         # Cotizaciones por mes (últimos 6 meses)
         cotizaciones_mensuales = db.query(
-            func.extract('year', Cotizacion.fecha_cotizacion).label('año'),
-            func.extract('month', Cotizacion.fecha_cotizacion).label('mes'),
+            func.extract('year', Cotizacion.fecha_creacion).label('año'),
+            func.extract('month', Cotizacion.fecha_creacion).label('mes'),
             func.count(Cotizacion.id).label('cantidad'),
             func.sum(Cotizacion.total).label('valor')
         ).filter(
             and_(
                 Cotizacion.activo == True,
-                Cotizacion.fecha_cotizacion >= func.current_date() - func.interval('6 months')
+                Cotizacion.fecha_creacion >= func.current_date() - func.interval('6 months')
             )
         ).group_by(
-            func.extract('year', Cotizacion.fecha_cotizacion),
-            func.extract('month', Cotizacion.fecha_cotizacion)
+            func.extract('year', Cotizacion.fecha_creacion),
+            func.extract('month', Cotizacion.fecha_creacion)
         ).order_by(
-            func.extract('year', Cotizacion.fecha_cotizacion),
-            func.extract('month', Cotizacion.fecha_cotizacion)
+            func.extract('year', Cotizacion.fecha_creacion),
+            func.extract('month', Cotizacion.fecha_creacion)
         ).all()
         
         return {

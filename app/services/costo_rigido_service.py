@@ -118,8 +118,8 @@ class CostoRigidoService(BaseService[CostoRigido, CostoRigidoCreate, CostoRigido
         """
         return db.query(CostoRigido).filter(
             and_(
-                CostoRigido.fecha_inicio >= fecha_inicio,
-                CostoRigido.fecha_inicio <= fecha_fin,
+                CostoRigido.fecha_aplicacion >= fecha_inicio,
+                CostoRigido.fecha_aplicacion <= fecha_fin,
                 CostoRigido.activo == True
             )
         ).offset(skip).limit(limit).all()
@@ -220,15 +220,15 @@ class CostoRigidoService(BaseService[CostoRigido, CostoRigidoCreate, CostoRigido
             Lista con costos por mes
         """
         resultado = db.query(
-            extract('month', CostoRigido.fecha_inicio).label('mes'),
+            extract('month', CostoRigido.fecha_aplicacion).label('mes'),
             func.count(CostoRigido.id).label('cantidad'),
             func.sum(CostoRigido.monto).label('total')
         ).filter(
-            extract('year', CostoRigido.fecha_inicio) == año
+            extract('year', CostoRigido.fecha_aplicacion) == año
         ).group_by(
-            extract('month', CostoRigido.fecha_inicio)
+            extract('month', CostoRigido.fecha_aplicacion)
         ).order_by(
-            extract('month', CostoRigido.fecha_inicio)
+            extract('month', CostoRigido.fecha_aplicacion)
         ).all()
         
         meses = [

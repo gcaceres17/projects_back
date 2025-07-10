@@ -62,7 +62,7 @@ async def listar_costos_rigidos(
             skip=skip,
             limit=limit,
             filters=filters,
-            order_by=[CostoRigido.fecha_inicio.desc()]
+            order_by=[CostoRigido.fecha_aplicacion.desc()]
         )
         
         return result
@@ -87,12 +87,7 @@ async def crear_costo_rigido(
             if not proyecto:
                 raise HTTPException(status_code=404, detail="Proyecto no encontrado")
         
-        # Validar fechas
-        if costo_data.fecha_fin and costo_data.fecha_fin <= costo_data.fecha_inicio:
-            raise HTTPException(
-                status_code=400, 
-                detail="La fecha de fin debe ser posterior a la fecha de inicio"
-            )
+        # El costo está listo para crear (sin validación de fecha_fin porque no existe)
         
         # Crear costo
         costo = costo_rigido_service.create(db=db, obj_data=costo_data.dict())
@@ -151,16 +146,8 @@ async def actualizar_costo_rigido(
         
         # Validar fechas si se están actualizando
         update_dict = costo_data.dict(exclude_unset=True)
-        fecha_inicio = update_dict.get('fecha_inicio', costo_existente.fecha_inicio)
-        fecha_fin = update_dict.get('fecha_fin', costo_existente.fecha_fin)
-        
-        if fecha_fin and fecha_fin <= fecha_inicio:
-            raise HTTPException(
-                status_code=400, 
-                detail="La fecha de fin debe ser posterior a la fecha de inicio"
-            )
-        
-        # Actualizar costo
+        fecha_aplicacion = update_dict.get('fecha_aplicacion', costo_existente.fecha_aplicacion)
+        # Actualizar costo (sin validación de fecha_fin porque no existe)
         costo = costo_rigido_service.update(
             db=db, 
             obj_id=costo_id, 
@@ -262,21 +249,21 @@ async def obtener_estadisticas_costos(
         
         # Costos mensuales (últimos 12 meses)
         costos_mensuales = db.query(
-            extract('year', CostoRigido.fecha_inicio).label('año'),
-            extract('month', CostoRigido.fecha_inicio).label('mes'),
+            extract('year', CostoRigido.fecha_aplicacion).label('año'),
+            extract('month', CostoRigido.fecha_aplicacion).label('mes'),
             func.count(CostoRigido.id).label('cantidad'),
-            func.sum(CostoRigido.monto).label('monto_total')
+            func.sum(CostoRigido.valor).label('monto_total')
         ).filter(
             and_(
                 CostoRigido.activo == True,
-                CostoRigido.fecha_inicio >= func.current_date() - func.interval('12 months')
+                CostoRigido.fecha_aplicacion >= func.current_date() - func.interval('12 months')
             )
         ).group_by(
-            extract('year', CostoRigido.fecha_inicio),
-            extract('month', CostoRigido.fecha_inicio)
+            extract('year', CostoRigido.fecha_aplicacion),
+            extract('month', CostoRigido.fecha_aplicacion)
         ).order_by(
-            extract('year', CostoRigido.fecha_inicio),
-            extract('month', CostoRigido.fecha_inicio)
+            extract('year', CostoRigido.fecha_aplicacion),
+            extract('month', CostoRigido.fecha_aplicacion)
         ).all()
         
         return {
@@ -410,11 +397,10 @@ async def calcular_proyeccion_costos(
                 fecha_mes = date(fecha_actual.year, fecha_actual.month + mes - 1, 1)
                 
                 # Verificar si está en el rango de fechas del costo
-                if fecha_mes < costo.fecha_inicio:
+                if fecha_mes < costo.fecha_aplicacion:
                     continue
                 
-                if costo.fecha_fin and fecha_mes > costo.fecha_fin:
-                    continue
+                # Sin fecha_fin, el costo se aplica indefinidamente
                 
                 # Calcular monto según frecuencia
                 if costo.frecuencia == "mensual":

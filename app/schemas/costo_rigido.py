@@ -65,9 +65,6 @@ class CostoRigidoResponse(CostoRigidoBase):
     fecha_creacion: datetime
     fecha_actualizacion: datetime
     
-    # Información del proyecto
-    proyecto: Optional[dict] = None
-    
     # Campos calculados
     valor_anual: Optional[float] = None
     valor_mensual: Optional[float] = None

@@ -105,15 +105,6 @@ class CotizacionResponse(CotizacionBase):
     fecha_envio: Optional[datetime]
     fecha_aprobacion: Optional[datetime]
     
-    # Información del cliente
-    cliente: Optional[dict] = None
-    
-    # Información del proyecto
-    proyecto: Optional[dict] = None
-    
-    # Items de la cotización
-    items: Optional[List[ItemCotizacionResponse]] = None
-    
     # Campos calculados
     dias_para_vencimiento: Optional[int] = None
     porcentaje_impuestos: Optional[float] = None
